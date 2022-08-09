@@ -1,7 +1,7 @@
 let productModel = require('../model/productModel')
-let uploadFile = require('../controller/awsController')
+let {uploadFile }= require('../controller/awsController')
 let { isValid, isValidRequestBody, isValidfiles, isValid2, isBoolean } = require('../validators/validator')
-const { default: mongoose } = require('mongoose')
+const mongoose = require('mongoose')
 
 
 let newProduct = async (req, res) => {
@@ -53,7 +53,7 @@ let newProduct = async (req, res) => {
         if (!["image/png", "image/jpeg"].includes(files[0].mimetype))
             return res.status(400).send({ status: false, message: "only png,jpg,jpeg files are allowed from productImage" })
 
-        productImage = await uploadFile.uploadFile(files[0])
+        productImage = await uploadFile(files[0],"products")
 
         availableSizes = availableSizes.split(",")
         
@@ -156,9 +156,9 @@ let updateByIDProduct = async (req, res) => {
 
         if (!mongoose.Types.ObjectId.isValid(productId))
             return res.status(400).send({ status: false, message: "INVALID PRODUCT ID" });
-
+            let files = req.files
         let requestBody = req.body
-        if (!isValidRequestBody(requestBody))
+        if (!isValidRequestBody(requestBody) && !files)
             return res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
 
         const product = {}
@@ -166,7 +166,7 @@ let updateByIDProduct = async (req, res) => {
 
         if (isValidRequestBody(other))
             return res.status(400).send({ status: false, message: "Any extra field is not allowed for updation" })
-        let files = req.files
+        
 
         if (productImage != undefined)
             return res.status(400).send({ status: false, message: "Product Image should have image file" })
@@ -228,7 +228,7 @@ let updateByIDProduct = async (req, res) => {
             if (!["image/png", "image/jpeg"].includes(files[0].mimetype))
                 return res.status(400).send({ status: false, message: "only png,jpg,jpeg files are allowed from productImage" })
 
-            product.productImage = await uploadFile.uploadFile(files[0])
+            product.productImage = await uploadFile(files[0],"products")
         }
 
 

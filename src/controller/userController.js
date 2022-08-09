@@ -19,7 +19,7 @@ const createUser = async function (req, res) {
             res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
             return
         }
-        //  requestBody.data = JSON.parse(requestBody.data)
+        
 
         let { fname, lname, email, phone, password, address, profileImage ,...other} = req.body
 
@@ -128,7 +128,7 @@ const createUser = async function (req, res) {
 
         //--------------------validation ends -------------------------------------------------------------------------------------------------------------
 
-        const profilePicture = await uploadFile(files[0])
+        const profilePicture = await uploadFile(files[0],"users")
 
         const encryptedPassword = await bcrypt.hash(password, saltRounds)
 
@@ -204,7 +204,9 @@ const getdetails = async (req, res) => {
 const updateuser = async (req, res) => {
     let userId = req.params.userId
     let userData = await userModel.findById(userId)
-    if (!isValidRequestBody(req.body)) {
+    let files = req.files
+    
+    if (!isValidRequestBody(req.body) && !files ) {
         return res.status(400).send({ status: false, message: "CANT BE EMPTY BODY" })
     }
     let { fname, lname, email, phone, password, address,profileImage,...other } = req.body
@@ -215,7 +217,7 @@ const updateuser = async (req, res) => {
     if(profileImage!=undefined)
         return res.status(400).send({status:false,message:"profileImage field should have a image file"})
 
-        let files = req.files
+        
 
         if (isValidfiles(files)) {
             if (files.length > 1 || files[0].fieldname != "profileImage")
@@ -224,7 +226,7 @@ const updateuser = async (req, res) => {
             if (!["image/png", "image/jpeg"].includes(files[0].mimetype))
                 return res.status(400).send({ status: false, message: "only png,jpg,jpeg files are allowed from profileImage" })
 
-            userData.profileImage = await uploadFile.uploadFile(files[0])
+            userData.profileImage = await uploadFile(files[0],"users")
         }
 
     if (fname || fname == "") {
